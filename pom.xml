@@ -7,7 +7,7 @@
 	<version>0.07.3i-SNAPSHOT</version>
 	<name>Sunflow libraries</name>
 	<url>http://www.massisframework.com/</url>
-	<description>Java3D Vecmath Libraries</description>
+	<description>Sunflow Libraries</description>
 	<properties>
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
 		<maven.compiler.source>1.7</maven.compiler.source>
