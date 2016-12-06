@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.massisframework.sunflow</groupId>
 	<artifactId>sunflow</artifactId>
-	<version>0.07.3i</version>
+	<version>0.07.4i-SNAPSHOT</version>
 	<name>Sunflow libraries</name>
 	<url>http://www.massisframework.com/</url>
 	<description>Sunflow Libraries</description>
@@ -24,7 +24,7 @@
 		<connection>scm:git:git@github.com:rpax/sunflow</connection>
 		<url>scm:git:git@github.com:rpax/sunflow</url>
 		<developerConnection>scm:git:git@github.com:rpax/sunflow</developerConnection>
-	  <tag>sunflow-0.07.3i</tag>
+	  <tag>HEAD</tag>
   </scm>
 	<distributionManagement>
 		<snapshotRepository>
