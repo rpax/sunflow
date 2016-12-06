@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.massisframework.sunflow</groupId>
 	<artifactId>sunflow</artifactId>
 	<version>0.07.3i-SNAPSHOT</version>
 	<name>Sunflow libraries</name>
 	<url>http://www.massisframework.com/</url>
-    <description>Java3D Vecmath Libraries</description>
+	<description>Java3D Vecmath Libraries</description>
 	<properties>
 		<project.build.sourceEncoding>ISO-8859-1</project.build.sourceEncoding>
 		<maven.compiler.source>1.7</maven.compiler.source>
@@ -45,11 +46,11 @@
 				<role>maintainer</role>
 			</roles>
 		</developer>
-        <developer>
-		<email>fpsunflower@users.sourceforge.net</email>
+		<developer>
+			<email>fpsunflower@users.sourceforge.net</email>
 			<name>Christopher Kulla</name>
-         <url>http://sunflow.sourceforge.net/</url>
-         <id>christopherKulla</id>
+			<url>http://sunflow.sourceforge.net/</url>
+			<id>christopherKulla</id>
 			<roles>
 				<role>developer</role>
 			</roles>
@@ -150,5 +151,12 @@
 			</build>
 		</profile>
 	</profiles>
+	<dependencies>
+		<dependency>
+			<groupId>org.codehaus.janino</groupId>
+			<artifactId>janino</artifactId>
+			<version>2.5.15</version>
+		</dependency>
+	</dependencies>
 </project>
 
