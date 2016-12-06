@@ -45,4 +45,14 @@ public class AmbientOcclusionShader implements Shader {
 
     public void scatterPhoton(ShadingState state, Color power) {
     }
+    
+    // EP : Added transparency management  
+    public boolean isOpaque() {
+        return true;
+    }
+    
+    public Color getOpacity(ShadingState state) {
+        return null;
+    }
+    // EP : End of modification
 }

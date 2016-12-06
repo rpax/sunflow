@@ -157,15 +157,22 @@ public class BucketRenderer implements ImageSampler {
             renderThreads[i].setPriority(scene.getThreadPriority());
             renderThreads[i].start();
         }
-        for (int i = 0; i < renderThreads.length; i++) {
-            try {
-                renderThreads[i].join();
-            } catch (InterruptedException e) {
-                UI.printError(Module.BCKT, "Bucket processing thread %d of %d was interrupted", i + 1, renderThreads.length);
-            } finally {
-                renderThreads[i].updateStats();
+        // EP : Moved InterruptedException out of loop to be able to stop all rendering threads
+        try {
+            for (int i = 0; i < renderThreads.length; i++) {
+                try {
+                    renderThreads[i].join();
+                } finally {
+                    renderThreads[i].updateStats();
+                }
             }
+        } catch (InterruptedException e) {
+            for (int i = 0; i < renderThreads.length; i++) {
+                renderThreads[i].interrupt();
+            }
+            UI.printError(Module.BCKT, "Bucket processing was interrupted");
         }
+        // EP : End of modification
         UI.taskStop();
         timer.end();
         UI.printInfo(Module.BCKT, "Render time: %s", timer.toString());
@@ -183,7 +190,8 @@ public class BucketRenderer implements ImageSampler {
 
         @Override
         public void run() {
-            while (true) {
+            // EP : Check rendering isn't interrupted 
+            while (!isInterrupted()) {
                 int bx, by;
                 synchronized (BucketRenderer.this) {
                     if (bucketCounter >= bucketCoords.length)
@@ -194,8 +202,6 @@ public class BucketRenderer implements ImageSampler {
                     bucketCounter += 2;
                 }
                 renderBucket(display, bx, by, threadID, istate);
-                if (UI.taskCanceled())
-                    return;
             }
         }
 
@@ -251,8 +257,13 @@ public class BucketRenderer implements ImageSampler {
             }
         }
         for (int x = 0; x < sbw - 1; x += maxStepSize)
-            for (int y = 0; y < sbh - 1; y += maxStepSize)
+            for (int y = 0; y < sbh - 1; y += maxStepSize) {
+                // EP : Check rendering isn't interrupted
+                if (Thread.currentThread().isInterrupted()) {
+                    return;
+                }
                 refineSamples(samples, sbw, x, y, maxStepSize, thresh, istate);
+            }
         if (dumpBuckets) {
             UI.printInfo(Module.BCKT, "Dumping bucket [%d, %d] to file ...", bx, by);
             GenericBitmap bitmap = new GenericBitmap(sbw, sbh);
@@ -297,7 +308,9 @@ public class BucketRenderer implements ImageSampler {
                             if (Math.abs(dy) > fhs)
                                 continue;
                             float f = filter.get(dx, dy);
-                            c.madd(f, samples[s].c);
+                            // EP : Test if color isn't null
+                            if (samples[s].c != null)
+                                c.madd(f, samples[s].c);
                             a += f * samples[s].alpha;
                             weight += f;
 

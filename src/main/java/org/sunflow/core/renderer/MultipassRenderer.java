@@ -86,15 +86,22 @@ public class MultipassRenderer implements ImageSampler {
             renderThreads[i].setPriority(scene.getThreadPriority());
             renderThreads[i].start();
         }
-        for (int i = 0; i < renderThreads.length; i++) {
-            try {
-                renderThreads[i].join();
-            } catch (InterruptedException e) {
-                UI.printError(Module.BCKT, "Bucket processing thread %d of %d was interrupted", i + 1, renderThreads.length);
-            } finally {
-                renderThreads[i].updateStats();
+        // EP : Moved InterruptedException out of loop to be able to stop all rendering threads
+        try {
+            for (int i = 0; i < renderThreads.length; i++) {
+                try {
+                    renderThreads[i].join();
+                } finally {
+                    renderThreads[i].updateStats();
+                }
             }
+        } catch (InterruptedException e) {
+            for (int i = 0; i < renderThreads.length; i++) {
+                renderThreads[i].interrupt();
+            }
+            UI.printError(Module.BCKT, "Bucket processing was interrupted");
         }
+        // EP : End of modification
         UI.taskStop();
         timer.end();
         UI.printInfo(Module.BCKT, "Render time: %s", timer.toString());
@@ -114,7 +121,8 @@ public class MultipassRenderer implements ImageSampler {
 
         @Override
         public void run() {
-            while (true) {
+            // EP : Check rendering isn't interrupted or canceled
+            while (!isInterrupted()) {
                 int bx, by;
                 synchronized (MultipassRenderer.this) {
                     if (bucketCounter >= bucketCoords.length)

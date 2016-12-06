@@ -11,7 +11,6 @@ import org.sunflow.core.Ray;
 import org.sunflow.core.Shader;
 import org.sunflow.core.ShadingState;
 import org.sunflow.core.Texture;
-import org.sunflow.core.TextureCache;
 import org.sunflow.image.Bitmap;
 import org.sunflow.image.Color;
 import org.sunflow.math.BoundingBox;
@@ -55,7 +54,8 @@ public class ImageBasedLight implements PrimitiveList, LightSource, Shader {
         numLowSamples = pl.getInt("lowsamples", numLowSamples);
         String filename = pl.getString("texture", null);
         if (filename != null)
-            texture = TextureCache.getTexture(api.resolveTextureFilename(filename), false);
+            // EP : Made texture cache local to a SunFlow API instance
+            texture = api.getTextureCache().getTexture(api.resolveTextureFilename(filename), false);
 
         // no texture provided
         if (texture == null)
@@ -272,4 +272,14 @@ public class ImageBasedLight implements PrimitiveList, LightSource, Shader {
     public Instance createInstance() {
         return Instance.createTemporary(this, null, this);
     }
+
+    // EP : Added transparency management  
+    public boolean isOpaque() {
+        return true;
+    }
+    
+    public Color getOpacity(ShadingState state) {
+        return null;
+    }
+    // EP : End of modification
 }

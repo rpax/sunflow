@@ -51,12 +51,12 @@ import org.sunflow.core.light.TriangleMeshLight;
 import org.sunflow.core.modifiers.BumpMappingModifier;
 import org.sunflow.core.modifiers.NormalMapModifier;
 import org.sunflow.core.modifiers.PerlinModifier;
-import org.sunflow.core.parser.RA2Parser;
-import org.sunflow.core.parser.RA3Parser;
-import org.sunflow.core.parser.SCAsciiParser;
-import org.sunflow.core.parser.SCBinaryParser;
-import org.sunflow.core.parser.SCParser;
-import org.sunflow.core.parser.ShaveRibParser;
+//import org.sunflow.core.parser.RA2Parser;
+//import org.sunflow.core.parser.RA3Parser;
+//import org.sunflow.core.parser.SCAsciiParser;
+//import org.sunflow.core.parser.SCBinaryParser;
+//import org.sunflow.core.parser.SCParser;
+//import org.sunflow.core.parser.ShaveRibParser;
 import org.sunflow.core.photonmap.CausticPhotonMap;
 import org.sunflow.core.photonmap.GlobalPhotonMap;
 import org.sunflow.core.photonmap.GridPhotonMap;
@@ -291,15 +291,16 @@ public final class PluginRegistry {
         imageSamplerPlugins.registerPlugin("multipass", MultipassRenderer.class);
     }
 
-    static {
-        // parsers
-        parserPlugins.registerPlugin("sc", SCParser.class);
-        parserPlugins.registerPlugin("sca", SCAsciiParser.class);
-        parserPlugins.registerPlugin("scb", SCBinaryParser.class);
-        parserPlugins.registerPlugin("rib", ShaveRibParser.class);
-        parserPlugins.registerPlugin("ra2", RA2Parser.class);
-        parserPlugins.registerPlugin("ra3", RA3Parser.class);
-    }
+// EP : Don't need parsers
+//    static {
+//        // parsers
+//        parserPlugins.registerPlugin("sc", SCParser.class);
+//        parserPlugins.registerPlugin("sca", SCAsciiParser.class);
+//        parserPlugins.registerPlugin("scb", SCBinaryParser.class);
+//        parserPlugins.registerPlugin("rib", ShaveRibParser.class);
+//        parserPlugins.registerPlugin("ra2", RA2Parser.class);
+//        parserPlugins.registerPlugin("ra3", RA3Parser.class);
+//    }
 
     static {
         // bitmap readers
@@ -309,6 +310,8 @@ public final class PluginRegistry {
         bitmapReaderPlugins.registerPlugin("jpg", JPGBitmapReader.class);
         bitmapReaderPlugins.registerPlugin("bmp", BMPBitmapReader.class);
         bitmapReaderPlugins.registerPlugin("igi", IGIBitmapReader.class);
+        // EP : Added extension jpeg
+        bitmapReaderPlugins.registerPlugin("jpeg", JPGBitmapReader.class);
     }
 
     static {

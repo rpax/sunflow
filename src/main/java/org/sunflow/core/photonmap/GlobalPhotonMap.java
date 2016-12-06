@@ -260,7 +260,8 @@ public final class GlobalPhotonMap implements GlobalPhotonMapInterface {
         t.start();
         balance();
         t.end();
-        UI.taskStop();
+        // EP : Replaced task management with interruptions
+        // UI.taskStop();
         UI.printInfo(Module.LIGHT, "Global photon map:");
         UI.printInfo(Module.LIGHT, "  * Photons stored:   %d", storedPhotons);
         UI.printInfo(Module.LIGHT, "  * Photons/estimate: %d", numGather);
@@ -328,7 +329,8 @@ public final class GlobalPhotonMap implements GlobalPhotonMapInterface {
             curr.data = irr.toRGBE();
             temp[i] = curr;
         }
-        UI.taskStop();
+        // EP : Replaced task management with interruptions
+        // UI.taskStop();
 
         // resize photon map to only include irradiance photons
         numGather /= 4;

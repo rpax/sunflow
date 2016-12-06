@@ -24,6 +24,12 @@ public class ShinyDiffuseShader implements Shader {
         return true;
     }
 
+    // EP : Added getter to read shininess from subclasses
+    protected float getShininess() {
+        return this.refl;
+    }
+    // EP : End of modification
+    
     public Color getDiffuse(ShadingState state) {
         return diff;
     }
@@ -90,4 +96,14 @@ public class ShinyDiffuseShader implements Shader {
             state.traceReflectionPhoton(new Ray(state.getPoint(), dir), power);
         }
     }
+
+    // EP : Added transparency management  
+    public boolean isOpaque() {
+        return true;
+    }
+    
+    public Color getOpacity(ShadingState state) {
+        return null;
+    }
+    // EP : End of modification
 }

@@ -41,15 +41,23 @@ public class SimpleRenderer implements ImageSampler {
             renderThreads[i] = new BucketThread();
             renderThreads[i].start();
         }
-        for (int i = 0; i < renderThreads.length; i++) {
-            try {
-                renderThreads[i].join();
-            } catch (InterruptedException e) {
-                UI.printError(Module.BCKT, "Bucket processing thread %d of %d was interrupted", i + 1, renderThreads.length);
-            } finally {
-                renderThreads[i].updateStats();
+        // EP : Moved InterruptedException out of loop to be able to stop all rendering threads
+        try {
+            for (int i = 0; i < renderThreads.length; i++) {
+                try {
+                    renderThreads[i].join();
+                } finally {
+                    renderThreads[i].updateStats();
+                }
             }
+        } catch (InterruptedException e) {
+            for (int i = 0; i < renderThreads.length; i++) {
+                renderThreads[i].interrupt();
+            }
+            UI.printError(Module.BCKT, "Bucket processing was interrupted");
         }
+        UI.taskStop();
+        // EP : End of modification
         timer.end();
         UI.printInfo(Module.BCKT, "Render time: %s", timer.toString());
         display.imageEnd();
@@ -60,7 +68,8 @@ public class SimpleRenderer implements ImageSampler {
 
         @Override
         public void run() {
-            while (true) {
+            // EP : Check rendering isn't interrupted 
+            while (!isInterrupted()) {
                 int bx, by;
                 synchronized (SimpleRenderer.this) {
                     if (bucketCounter >= numBuckets)
@@ -90,6 +99,9 @@ public class SimpleRenderer implements ImageSampler {
 
         for (int y = 0, i = 0; y < bh; y++) {
             for (int x = 0; x < bw; x++, i++) {
+                // EP : Check rendering isn't interrupted
+                if (Thread.currentThread().isInterrupted())
+                    return;
                 ShadingState state = scene.getRadiance(istate, x0 + x, imageHeight - 1 - (y0 + y), 0.0, 0.0, 0.0, 0, 0, null);
                 bucketRGB[i] = (state != null) ? state.getResult() : Color.BLACK;
                 bucketAlpha[i] = (state != null) ? 1 : 0;

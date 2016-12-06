@@ -4,7 +4,6 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -78,10 +77,11 @@ public class ImagePanel extends JPanel implements Display {
             mouseDragged(e);
         }
 
-        @Override
-        public void mouseWheelMoved(MouseWheelEvent e) {
-            zoom(-20 * e.getWheelRotation(), 0);
-        }
+// EP : Support Java 1.5 
+//        @Override
+//        public void mouseWheelMoved(MouseWheelEvent e) {
+//            zoom(-20 * e.getWheelRotation(), 0);
+//        }
     }
 
     public ImagePanel() {
@@ -92,7 +92,8 @@ public class ImagePanel extends JPanel implements Display {
         ScrollZoomListener listener = new ScrollZoomListener();
         addMouseListener(listener);
         addMouseMotionListener(listener);
-        addMouseWheelListener(listener);
+// EP : Support Java 1.5 
+//        addMouseWheelListener(listener);
     }
 
     public void save(String filename) {

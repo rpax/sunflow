@@ -1,9 +1,15 @@
 package org.sunflow.image.readers;
 
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.JarURLConnection;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.net.URLConnection;
 
 import org.sunflow.image.Bitmap;
 import org.sunflow.image.BitmapReader;
@@ -15,7 +21,35 @@ import org.sunflow.image.formats.BitmapXYZ;
  */
 public class IGIBitmapReader implements BitmapReader {
     public Bitmap load(String filename, boolean isLinear) throws IOException, BitmapFormatException {
-        InputStream stream = new BufferedInputStream(new FileInputStream(filename));
+        // EP : Try to read filename as an URL or as a file
+        InputStream stream;
+        try {
+          // Let's try first to read filename as an URL
+            URLConnection connection = new URL(filename).openConnection();
+            if (connection instanceof JarURLConnection) {
+                JarURLConnection urlConnection = (JarURLConnection) connection;
+                URL jarFileUrl = urlConnection.getJarFileURL();
+                if (jarFileUrl.getProtocol().equalsIgnoreCase("file")) {
+                    try {
+                        if (new File(jarFileUrl.toURI()).canWrite()) {
+                            // Refuse to use cache to be able to delete the writable files accessed with jar protocol,
+                            // as suggested in http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6962459
+                            connection.setUseCaches(false);
+                        }
+                    } catch (URISyntaxException ex) {
+                        throw new IOException(ex);
+                    }
+                }
+            }
+            stream = connection.getInputStream();
+        } catch (MalformedURLException ex) {
+            // Let's try to read filename as a file
+            stream = new FileInputStream(filename);
+        }
+
+        stream = new BufferedInputStream(stream);
+        // End of modification
+
         // read header
         int magic = read32i(stream);
         int version = read32i(stream);

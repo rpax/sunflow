@@ -315,6 +315,12 @@ public class SunSkyLight implements LightSource, PrimitiveList, Shader {
         return getSkyRGB(basis.untransform(state.getRay().getDirection())).constrainRGB();
     }
 
+    // EP : Reused sun sky color
+    public Color getSunColor() {
+        return getSkyRGB(basis.untransform(sunDirWorld)).constrainRGB();
+    }
+    // EP : End of modification
+    
     public void scatterPhoton(ShadingState state, Color power) {
         // let photon escape
     }
@@ -334,4 +340,14 @@ public class SunSkyLight implements LightSource, PrimitiveList, Shader {
     public Instance createInstance() {
         return Instance.createTemporary(this, null, this);
     }
+
+    // EP : Added transparency management  
+    public boolean isOpaque() {
+        return true;
+    }
+    
+    public Color getOpacity(ShadingState state) {
+        return null;
+    }
+    // EP : End of modification
 }

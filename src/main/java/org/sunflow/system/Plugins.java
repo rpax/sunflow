@@ -1,9 +1,5 @@
 package org.sunflow.system;
 
-import org.codehaus.janino.ClassBodyEvaluator;
-import org.codehaus.janino.CompileException;
-import org.codehaus.janino.Parser.ParseException;
-import org.codehaus.janino.Scanner.ScanException;
 import org.sunflow.system.UI.Module;
 import org.sunflow.util.FastHashMap;
 
@@ -98,25 +94,27 @@ public final class Plugins<T> {
      */
     @SuppressWarnings("unchecked")
     public boolean registerPlugin(String name, String sourceCode) {
-        try {
-            ClassBodyEvaluator cbe = new ClassBodyEvaluator();
-            cbe.setClassName(name);
-            if (baseClass.isInterface())
-                cbe.setImplementedTypes(new Class[] { baseClass });
-            else
-                cbe.setExtendedType(baseClass);
-            cbe.cook(sourceCode);
-            return registerPlugin(name, cbe.getClazz());
-        } catch (CompileException e) {
-            UI.printError(Module.API, "Plugin \"%s\" could not be declared - %s", name, e.getLocalizedMessage());
-            return false;
-        } catch (ParseException e) {
-            UI.printError(Module.API, "Plugin \"%s\" could not be declared - %s", name, e.getLocalizedMessage());
-            return false;
-        } catch (ScanException e) {
-            UI.printError(Module.API, "Plugin \"%s\" could not be declared - %s", name, e.getLocalizedMessage());
-            return false;
-        }
+// EP : Don't need parser        
+//        try {
+//            ClassBodyEvaluator cbe = new ClassBodyEvaluator();
+//            cbe.setClassName(name);
+//            if (baseClass.isInterface())
+//                cbe.setImplementedTypes(new Class[] { baseClass });
+//            else
+//                cbe.setExtendedType(baseClass);
+//            cbe.cook(sourceCode);
+//            return registerPlugin(name, cbe.getClazz());
+//        } catch (CompileException e) {
+//            UI.printError(Module.API, "Plugin \"%s\" could not be declared - %s", name, e.getLocalizedMessage());
+//            return false;
+//        } catch (ParseException e) {
+//            UI.printError(Module.API, "Plugin \"%s\" could not be declared - %s", name, e.getLocalizedMessage());
+//            return false;
+//        } catch (ScanException e) {
+//            UI.printError(Module.API, "Plugin \"%s\" could not be declared - %s", name, e.getLocalizedMessage());
+//            return false;
+//        }
+        return false;
     }
 
     /**

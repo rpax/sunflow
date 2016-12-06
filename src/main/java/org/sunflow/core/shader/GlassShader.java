@@ -136,4 +136,14 @@ public class GlassShader implements Shader {
             }
         }
     }
+
+    // EP : Added transparency management  
+    public boolean isOpaque() {
+        return absorptionColor.isWhite();
+    }
+    
+    public Color getOpacity(ShadingState state) {
+        return absorptionColor;
+    }
+    // EP : End of modification
 }

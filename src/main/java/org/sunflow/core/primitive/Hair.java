@@ -258,4 +258,14 @@ public class Hair implements PrimitiveList, Shader {
     public PrimitiveList getBakingPrimitives() {
         return null;
     }
+
+    // EP : Added transparency management  
+    public boolean isOpaque() {
+        return true;
+    }
+    
+    public Color getOpacity(ShadingState state) {
+        return null;
+    }
+    // EP : End of modification
 }

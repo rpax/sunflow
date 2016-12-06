@@ -10,9 +10,11 @@ import org.sunflow.system.UI.Module;
  * texture might be used more than once in your scene.
  */
 public final class TextureCache {
-    private static HashMap<String, Texture> textures = new HashMap<String, Texture>();
+    // EP : Removed static to enable GC to free Texture memory
+    private HashMap<String, Texture> textures = new HashMap<String, Texture>();
 
-    private TextureCache() {
+    // EP : Made texture cache local to SunFlow API
+    public TextureCache() {
     }
 
     /**
@@ -25,7 +27,8 @@ public final class TextureCache {
      * @return texture object
      * @see Texture
      */
-    public synchronized static Texture getTexture(String filename, boolean isLinear) {
+    // EP : Removed static to enable GC to free Texture memory
+    public synchronized Texture getTexture(String filename, boolean isLinear) {
         if (textures.containsKey(filename)) {
             UI.printInfo(Module.TEX, "Using cached copy for file \"%s\" ...", filename);
             return textures.get(filename);
@@ -40,7 +43,8 @@ public final class TextureCache {
      * Flush all textures from the cache, this will cause them to be reloaded
      * anew the next time they are accessed.
      */
-    public synchronized static void flush() {
+    // EP : Removed static to enable GC to free Texture memory
+    public synchronized void flush() {
         UI.printInfo(Module.TEX, "Flushing texture cache");
         textures.clear();
     }

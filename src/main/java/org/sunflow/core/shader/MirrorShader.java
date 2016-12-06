@@ -59,4 +59,14 @@ public class MirrorShader implements Shader {
         dir.z = (dn * state.getNormal().z) + state.getRay().getDirection().z;
         state.traceReflectionPhoton(new Ray(state.getPoint(), dir), power);
     }
+
+    // EP : Added transparency management  
+    public boolean isOpaque() {
+        return true;
+    }
+    
+    public Color getOpacity(ShadingState state) {
+        return null;
+    }
+    // EP : End of modification
 }

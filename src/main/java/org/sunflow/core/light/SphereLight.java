@@ -150,4 +150,14 @@ public class SphereLight implements LightSource, Shader {
     public Instance createInstance() {
         return Instance.createTemporary(new Sphere(), Matrix4.translation(center.x, center.y, center.z).multiply(Matrix4.scale(radius)), this);
     }
+
+    // EP : Added transparency management  
+    public boolean isOpaque() {
+        return true;
+    }
+    
+    public Color getOpacity(ShadingState state) {
+        return null;
+    }
+    // EP : End of modification
 }

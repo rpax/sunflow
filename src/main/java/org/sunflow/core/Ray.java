@@ -214,4 +214,11 @@ public final class Ray {
     public final void setMax(float t) {
         tMax = t;
     }
+
+    // EP : Added transparency management  
+    public void setMinMax(float min, float max) {
+        tMin = min;
+        tMax = max;
+    }
+    // EP : end of modification  
 }

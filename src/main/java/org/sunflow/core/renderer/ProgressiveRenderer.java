@@ -58,15 +58,22 @@ public class ProgressiveRenderer implements ImageSampler {
             renderThreads[i] = new SmallBucketThread();
             renderThreads[i].start();
         }
-        for (int i = 0; i < renderThreads.length; i++) {
-            try {
-                renderThreads[i].join();
-            } catch (InterruptedException e) {
-                UI.printError(Module.IPR, "Thread %d of %d was interrupted", i + 1, renderThreads.length);
-            } finally {
-                renderThreads[i].updateStats();
+        // EP : Moved InterruptedException out of loop to be able to stop all rendering threads
+        try {
+            for (int i = 0; i < renderThreads.length; i++) {
+                try {
+                    renderThreads[i].join();
+                } finally {
+                    renderThreads[i].updateStats();
+                }
             }
+        } catch (InterruptedException e) {
+            for (int i = 0; i < renderThreads.length; i++) {
+                renderThreads[i].interrupt();
+            }
+            UI.printError(Module.IPR, "Thread was interrupted");
         }
+        // EP : End of modification
         UI.taskStop();
         t.end();
         UI.printInfo(Module.IPR, "Rendering time: %s", t.toString());
@@ -78,7 +85,8 @@ public class ProgressiveRenderer implements ImageSampler {
 
         @Override
         public void run() {
-            while (true) {
+            // EP : Check rendering isn't interrupted
+            while (!isInterrupted()) {
                 int n = progressiveRenderNext(istate);
                 synchronized (ProgressiveRenderer.this) {
                     if (counter >= counterMax)
@@ -86,8 +94,6 @@ public class ProgressiveRenderer implements ImageSampler {
                     counter += n;
                     UI.taskUpdate(counter);
                 }
-                if (UI.taskCanceled())
-                    return;
             }
         }
 

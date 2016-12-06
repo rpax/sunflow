@@ -116,6 +116,12 @@ public final class Color {
         return r <= 0 && g <= 0 && b <= 0;
     }
 
+    // EP : Added to manage white colors
+    public boolean isWhite() {
+        return r >= 1 && g >= 1 && b >= 1;
+    }
+    // EP : End of modification
+
     public final float getLuminance() {
         return (0.2989f * r) + (0.5866f * g) + (0.1145f * b);
     }

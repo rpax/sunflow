@@ -5,7 +5,6 @@ import org.sunflow.core.Modifier;
 import org.sunflow.core.ParameterList;
 import org.sunflow.core.ShadingState;
 import org.sunflow.core.Texture;
-import org.sunflow.core.TextureCache;
 import org.sunflow.math.OrthoNormalBasis;
 
 public class NormalMapModifier implements Modifier {
@@ -18,7 +17,8 @@ public class NormalMapModifier implements Modifier {
     public boolean update(ParameterList pl, SunflowAPI api) {
         String filename = pl.getString("texture", null);
         if (filename != null)
-            normalMap = TextureCache.getTexture(api.resolveTextureFilename(filename), true);
+            // EP : Made texture cache local to a SunFlow API instance
+            normalMap = api.getTextureCache().getTexture(api.resolveTextureFilename(filename), true);
         return normalMap != null;
     }
 

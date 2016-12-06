@@ -43,7 +43,6 @@ import org.sunflow.Benchmark;
 import org.sunflow.RealtimeBenchmark;
 import org.sunflow.SunflowAPI;
 import org.sunflow.core.Display;
-import org.sunflow.core.TextureCache;
 import org.sunflow.core.accel.KDTree;
 import org.sunflow.core.display.FileDisplay;
 import org.sunflow.core.display.FrameDisplay;
@@ -52,9 +51,9 @@ import org.sunflow.core.primitive.TriangleMesh;
 import org.sunflow.system.ImagePanel;
 import org.sunflow.system.Timer;
 import org.sunflow.system.UI;
-import org.sunflow.system.UserInterface;
 import org.sunflow.system.UI.Module;
 import org.sunflow.system.UI.PrintLevel;
+import org.sunflow.system.UserInterface;
 
 @SuppressWarnings("serial")
 public class SunflowGUI extends javax.swing.JFrame implements UserInterface {
@@ -1069,7 +1068,8 @@ public class SunflowGUI extends javax.swing.JFrame implements UserInterface {
     }
 
     private void textureCacheClearMenuItemActionPerformed(ActionEvent evt) {
-        TextureCache.flush();
+        // EP : Made texture cache local to SunFlow API
+        api.getTextureCache().flush();
     }
 
     private void smallTrianglesMenuItemActionPerformed(ActionEvent evt) {

@@ -6,7 +6,6 @@ import org.sunflow.core.Ray;
 import org.sunflow.core.Shader;
 import org.sunflow.core.ShadingState;
 import org.sunflow.core.Texture;
-import org.sunflow.core.TextureCache;
 import org.sunflow.image.Color;
 import org.sunflow.math.MathUtils;
 import org.sunflow.math.OrthoNormalBasis;
@@ -36,10 +35,12 @@ public class UberShader implements Shader {
         String filename;
         filename = pl.getString("diffuse.texture", null);
         if (filename != null)
-            diffmap = TextureCache.getTexture(api.resolveTextureFilename(filename), false);
+            // EP : Made texture cache local to a SunFlow API instance
+            diffmap = api.getTextureCache().getTexture(api.resolveTextureFilename(filename), false);
         filename = pl.getString("specular.texture", null);
         if (filename != null)
-            specmap = TextureCache.getTexture(api.resolveTextureFilename(filename), false);
+            // EP : Made texture cache local to a SunFlow API instance
+            specmap = api.getTextureCache().getTexture(api.resolveTextureFilename(filename), false);
         diffBlend = MathUtils.clamp(pl.getFloat("diffuse.blend", diffBlend), 0, 1);
         specBlend = MathUtils.clamp(pl.getFloat("specular.blend", diffBlend), 0, 1);
         glossyness = MathUtils.clamp(pl.getFloat("glossyness", glossyness), 0, 1);
@@ -61,30 +62,43 @@ public class UberShader implements Shader {
         // direct lighting
         state.initLightSamples();
         state.initCausticSamples();
-        Color d = getDiffuse(state);
-        Color lr = state.diffuse(d);
-        if (!state.includeSpecular())
-            return lr;
-        if (glossyness == 0) {
-            float cos = state.getCosND();
-            float dn = 2 * cos;
-            Vector3 refDir = new Vector3();
-            refDir.x = (dn * state.getNormal().x) + state.getRay().getDirection().x;
-            refDir.y = (dn * state.getNormal().y) + state.getRay().getDirection().y;
-            refDir.z = (dn * state.getNormal().z) + state.getRay().getDirection().z;
-            Ray refRay = new Ray(state.getPoint(), refDir);
-            // compute Fresnel term
-            cos = 1 - cos;
-            float cos2 = cos * cos;
-            float cos5 = cos2 * cos2 * cos;
-            Color spec = getSpecular(state);
-            Color ret = Color.white();
-            ret.sub(spec);
-            ret.mul(cos5);
-            ret.add(spec);
-            return lr.add(ret.mul(state.traceReflection(refRay, 0)));
-        } else
-            return lr.add(state.specularPhong(getSpecular(state), 2 / glossyness, numSamples));
+        // EP : Added transparency management  
+        float alpha;
+        if (!isOpaque() && diffmap != null && (alpha = diffmap.getOpacityAlpha(state.getUV().x, state.getUV().y)) <= 0.99999) {
+            // Ignore glossiness for half transparent pixels
+            Color c = state.diffuse(getDiffuse(state));
+            Vector3 refrDir = state.getRay().getDirection();
+            Color refraction = state.traceRefraction(new Ray(state.getPoint(), refrDir), 0);
+            return c.mul(alpha).madd(1 - alpha, refraction);
+        } else {
+        // EP : End of modification
+            Color d = getDiffuse(state);
+            Color lr = state.diffuse(d);
+            if (!state.includeSpecular())
+                return lr;
+            if (glossyness == 0) {
+                float cos = state.getCosND();
+                float dn = 2 * cos;
+                Vector3 refDir = new Vector3();
+                refDir.x = (dn * state.getNormal().x) + state.getRay().getDirection().x;
+                refDir.y = (dn * state.getNormal().y) + state.getRay().getDirection().y;
+                refDir.z = (dn * state.getNormal().z) + state.getRay().getDirection().z;
+                Ray refRay = new Ray(state.getPoint(), refDir);
+                // compute Fresnel term
+                cos = 1 - cos;
+                float cos2 = cos * cos;
+                float cos5 = cos2 * cos2 * cos;
+                Color spec = getSpecular(state);
+                Color ret = Color.white();
+                ret.sub(spec);
+                ret.mul(cos5);
+                ret.add(spec);
+                return lr.add(ret.mul(state.traceReflection(refRay, 0)));
+            } else
+                return lr.add(state.specularPhong(getSpecular(state), 2 / glossyness, numSamples));
+        // EP : Added transparency management  
+        }
+        // EP : End of modification
     }
 
     public void scatterPhoton(ShadingState state, Color power) {
@@ -138,4 +152,14 @@ public class UberShader implements Shader {
             }
         }
     }
+
+    // EP : Added transparency management  
+    public boolean isOpaque() {
+        return diffmap == null || !(diffmap.isTransparent());
+    }
+    
+    public Color getOpacity(ShadingState state) {
+        return diffmap != null ? diffmap.getOpacity(state.getUV().x, state.getUV().y) : Color.WHITE;
+    }
+    // EP : End of modification
 }

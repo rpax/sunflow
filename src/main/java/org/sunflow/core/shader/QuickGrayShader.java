@@ -56,4 +56,14 @@ public class QuickGrayShader implements Shader {
             state.traceDiffusePhoton(new Ray(state.getPoint(), w), power);
         }
     }
+
+    // EP : Added transparency management  
+    public boolean isOpaque() {
+        return true;
+    }
+    
+    public Color getOpacity(ShadingState state) {
+        return null;
+    }
+    // EP : End of modification
 }

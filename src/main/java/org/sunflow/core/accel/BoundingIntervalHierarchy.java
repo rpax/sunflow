@@ -177,7 +177,13 @@ public class BoundingIntervalHierarchy implements AccelerationStructure {
         float clipL = Float.NaN, clipR = Float.NaN, prevClip = Float.NaN;
         float split = Float.NaN, prevSplit;
         boolean wasLeft = true;
-        while (true) {
+        // EP : Added a loop counter to avoid endless loop
+        float[] gridBoxCopy = gridBox.clone();
+        float[] nodeBoxCopy = nodeBox.clone();
+        int loopCount = 0;
+        // EP : End of modification
+        do {
+        // while (true) {
             prevAxis = axis;
             prevSplit = split;
             // perform quick consistency checks
@@ -256,7 +262,8 @@ public class BoundingIntervalHierarchy implements AccelerationStructure {
             // ensure we are making progress in the subdivision
             if (right == rightOrig) {
                 // all left
-                if (clipL <= split) {
+                // EP : Added additional test to avoid endless loop
+                if (clipL < split || (clipL == split && !(prevAxis == axis && prevSplit == split))) {
                     // keep looping on left half
                     gridBox[2 * axis + 1] = split;
                     prevClip = clipL;
@@ -274,7 +281,8 @@ public class BoundingIntervalHierarchy implements AccelerationStructure {
             } else if (left > right) {
                 // all right
                 right = rightOrig;
-                if (clipR >= split) {
+                // EP : Added additional test to avoid endless loop
+                if (clipR > split || (clipR == split && !(prevAxis == axis && prevSplit == split))) {
                     // keep looping on right half
                     gridBox[2 * axis + 0] = split;
                     prevClip = clipR;
@@ -322,7 +330,15 @@ public class BoundingIntervalHierarchy implements AccelerationStructure {
                 }
                 break;
             }
+        // EP : Added test to avoid endless loop
+        } while (loopCount++ < 100);
+        if (loopCount > 100) {
+            System.arraycopy(gridBoxCopy, 0, gridBox, 0, gridBox.length);
+            System.arraycopy(nodeBoxCopy, 0, nodeBox, 0, nodeBox.length);
+            return;
         }
+        // EP : End of modification
+        
         // compute index of child nodes
         int nextIndex = tempTree.getSize();
         // allocate left node
@@ -482,8 +498,13 @@ public class BoundingIntervalHierarchy implements AccelerationStructure {
                             intervalMax = (tf <= intervalMax) ? tf : intervalMax;
                             continue;
                         }
+                        // EP : Give up if stack is full
+                        if (stackPos == stack.length) {
+                            break pushloop;
+                        }
+                        // EP : End of modification
                         // ray passes through both nodes
-                        // push back node
+                        // push back node                        
                         stack[stackPos].node = back;
                         stack[stackPos].near = (tb >= intervalMin) ? tb : intervalMin;
                         stack[stackPos].far = intervalMax;
@@ -511,6 +532,11 @@ public class BoundingIntervalHierarchy implements AccelerationStructure {
                             intervalMax = (tf <= intervalMax) ? tf : intervalMax;
                             continue;
                         }
+                        // EP : Give up if stack is full
+                        if (stackPos == stack.length) {
+                            break pushloop;
+                        }
+                        // EP : End of modification
                         // ray passes through both nodes
                         // push back node
                         stack[stackPos].node = back;
@@ -541,6 +567,11 @@ public class BoundingIntervalHierarchy implements AccelerationStructure {
                             intervalMax = (tf <= intervalMax) ? tf : intervalMax;
                             continue;
                         }
+                        // EP : Give up if stack is full
+                        if (stackPos == stack.length) {
+                            break pushloop;
+                        }
+                        // EP : End of modification
                         // ray passes through both nodes
                         // push back node
                         stack[stackPos].node = back;
@@ -597,7 +628,12 @@ public class BoundingIntervalHierarchy implements AccelerationStructure {
             } // traversal loop
             do {
                 // stack is empty?
-                if (stackPos == 0)
+                if (stackPos == 0 
+                    // EP : Check ray values aren't NaN
+                    || Float.isNaN(r.dx) 
+                    || Float.isNaN(r.dy) 
+                    || Float.isNaN(r.dz))
+                    // EP : End of modification
                     return;
                 // move back up the stack
                 stackPos--;

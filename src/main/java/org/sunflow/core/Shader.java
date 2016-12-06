@@ -26,4 +26,18 @@ public interface Shader extends RenderObject {
      * @param power power of the incoming photon.
      */
     public void scatterPhoton(ShadingState state, Color power);
+
+    // EP : Added transparency management  
+    /**
+     * Returns <code>true</code> if this shader is fully opaque. 
+     * This gives a quick way to find out if a shader needs further processing 
+     * when hit by a shadow ray. 
+     */
+    public boolean isOpaque(); 
+    
+    /**
+     * Returns how much light is blocked by this shader.  
+     */
+    public Color getOpacity(ShadingState state);    
+    // EP : End of modification
 }

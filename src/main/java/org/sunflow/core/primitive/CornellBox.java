@@ -443,4 +443,14 @@ public class CornellBox implements PrimitiveList, Shader, LightSource {
     public Instance createInstance() {
         return Instance.createTemporary(this, null, this);
     }
+
+    // EP : Added transparency management  
+    public boolean isOpaque() {
+        return true;
+    }
+    
+    public Color getOpacity(ShadingState state) {
+        return null;
+    }
+    // EP : End of modification
 }

@@ -1,16 +1,8 @@
 package org.sunflow;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.Locale;
 
-import org.codehaus.janino.ClassBodyEvaluator;
-import org.codehaus.janino.CompileException;
-import org.codehaus.janino.Scanner;
-import org.codehaus.janino.Parser.ParseException;
-import org.codehaus.janino.Scanner.ScanException;
 import org.sunflow.core.Camera;
 import org.sunflow.core.CameraLens;
 import org.sunflow.core.Display;
@@ -26,6 +18,7 @@ import org.sunflow.core.Scene;
 import org.sunflow.core.SceneParser;
 import org.sunflow.core.Shader;
 import org.sunflow.core.Tesselatable;
+import org.sunflow.core.TextureCache;
 import org.sunflow.core.ParameterList.InterpolationType;
 import org.sunflow.image.ColorFactory;
 import org.sunflow.image.ColorFactory.ColorSpecificationException;
@@ -36,7 +29,6 @@ import org.sunflow.math.Point3;
 import org.sunflow.math.Vector3;
 import org.sunflow.system.FileUtils;
 import org.sunflow.system.SearchPath;
-import org.sunflow.system.Timer;
 import org.sunflow.system.UI;
 import org.sunflow.system.UI.Module;
 
@@ -565,51 +557,53 @@ public class SunflowAPI implements SunflowAPIInterface {
      * @return a valid SunflowAPI object or <code>null</code> on failure
      */
     public static SunflowAPI create(String filename, int frameNumber) {
-        if (filename == null)
-            return new SunflowAPI();
-        SunflowAPI api = null;
-        if (filename.endsWith(".java")) {
-            Timer t = new Timer();
-            UI.printInfo(Module.API, "Compiling \"" + filename + "\" ...");
-            t.start();
-            try {
-                FileInputStream stream = new FileInputStream(filename);
-                api = (SunflowAPI) ClassBodyEvaluator.createFastClassBodyEvaluator(new Scanner(filename, stream), SunflowAPI.class, ClassLoader.getSystemClassLoader());
-                stream.close();
-            } catch (CompileException e) {
-                UI.printError(Module.API, "Could not compile: \"%s\"", filename);
-                UI.printError(Module.API, "%s", e.getMessage());
-                return null;
-            } catch (ParseException e) {
-                UI.printError(Module.API, "Could not compile: \"%s\"", filename);
-                UI.printError(Module.API, "%s", e.getMessage());
-                return null;
-            } catch (ScanException e) {
-                UI.printError(Module.API, "Could not compile: \"%s\"", filename);
-                UI.printError(Module.API, "%s", e.getMessage());
-                return null;
-            } catch (IOException e) {
-                UI.printError(Module.API, "Could not compile: \"%s\"", filename);
-                UI.printError(Module.API, "%s", e.getMessage());
-                return null;
-            }
-            t.end();
-            UI.printInfo(Module.API, "Compile time: " + t.toString());
-            // allow relative paths
-            String currentFolder = new File(filename).getAbsoluteFile().getParentFile().getAbsolutePath();
-            api.includeSearchPath.addSearchPath(currentFolder);
-            api.textureSearchPath.addSearchPath(currentFolder);
-            UI.printInfo(Module.API, "Build script running ...");
-            t.start();
-            api.currentFrame(frameNumber);
-            api.build();
-            t.end();
-            UI.printInfo(Module.API, "Build script time: %s", t.toString());
-        } else {
-            api = new SunflowAPI();
-            api = api.include(filename) ? api : null;
-        }
-        return api;
+// EP : Don't need parser        
+//        if (filename == null)
+//            return new SunflowAPI();
+//        SunflowAPI api = null;
+//        if (filename.endsWith(".java")) {
+//            Timer t = new Timer();
+//            UI.printInfo(Module.API, "Compiling \"" + filename + "\" ...");
+//            t.start();
+//            try {
+//                FileInputStream stream = new FileInputStream(filename);
+//                api = (SunflowAPI) ClassBodyEvaluator.createFastClassBodyEvaluator(new Scanner(filename, stream), SunflowAPI.class, ClassLoader.getSystemClassLoader());
+//                stream.close();
+//            } catch (CompileException e) {
+//                UI.printError(Module.API, "Could not compile: \"%s\"", filename);
+//                UI.printError(Module.API, "%s", e.getMessage());
+//                return null;
+//            } catch (ParseException e) {
+//                UI.printError(Module.API, "Could not compile: \"%s\"", filename);
+//                UI.printError(Module.API, "%s", e.getMessage());
+//                return null;
+//            } catch (ScanException e) {
+//                UI.printError(Module.API, "Could not compile: \"%s\"", filename);
+//                UI.printError(Module.API, "%s", e.getMessage());
+//                return null;
+//            } catch (IOException e) {
+//                UI.printError(Module.API, "Could not compile: \"%s\"", filename);
+//                UI.printError(Module.API, "%s", e.getMessage());
+//                return null;
+//            }
+//            t.end();
+//            UI.printInfo(Module.API, "Compile time: " + t.toString());
+//            // allow relative paths
+//            String currentFolder = new File(filename).getAbsoluteFile().getParentFile().getAbsolutePath();
+//            api.includeSearchPath.addSearchPath(currentFolder);
+//            api.textureSearchPath.addSearchPath(currentFolder);
+//            UI.printInfo(Module.API, "Build script running ...");
+//            t.start();
+//            api.currentFrame(frameNumber);
+//            api.build();
+//            t.end();
+//            UI.printInfo(Module.API, "Build script time: %s", t.toString());
+//        } else {
+//            api = new SunflowAPI();
+//            api = api.include(filename) ? api : null;
+//        }
+//        return api;
+        throw new UnsupportedOperationException("Removed parser support  from SunFlow");
     }
 
     /**
@@ -620,35 +614,37 @@ public class SunflowAPI implements SunflowAPIInterface {
      * @return <code>true</code> upon success, <code>false</code> otherwise
      */
     public static boolean translate(String filename, String outputFilename) {
-        FileSunflowAPI api = null;
-        try {
-            if (outputFilename.endsWith(".sca"))
-                api = new AsciiFileSunflowAPI(outputFilename);
-            else if (outputFilename.endsWith(".scb"))
-                api = new BinaryFileSunflowAPI(outputFilename);
-            else {
-                UI.printError(Module.API, "Unable to determine output filetype: \"%s\"", outputFilename);
-                return false;
-            }
-        } catch (IOException e) {
-            UI.printError(Module.API, "Unable to create output file - %s", e.getMessage());
-            return false;
-        }
-        String extension = filename.substring(filename.lastIndexOf('.') + 1);
-        SceneParser parser = PluginRegistry.parserPlugins.createObject(extension);
-        if (parser == null) {
-            UI.printError(Module.API, "Unable to find a suitable parser for: \"%s\"", filename);
-            return false;
-        }
-        try {
-            return parser.parse(filename, api);
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            UI.printError(Module.API, "Error occured during translation: %s", e.getMessage());
-            return false;
-        } finally {
-            api.close();
-        }
+// EP : Don't need parser        
+//        FileSunflowAPI api = null;
+//        try {
+//            if (outputFilename.endsWith(".sca"))
+//                api = new AsciiFileSunflowAPI(outputFilename);
+//            else if (outputFilename.endsWith(".scb"))
+//                api = new BinaryFileSunflowAPI(outputFilename);
+//            else {
+//                UI.printError(Module.API, "Unable to determine output filetype: \"%s\"", outputFilename);
+//                return false;
+//            }
+//        } catch (IOException e) {
+//            UI.printError(Module.API, "Unable to create output file - %s", e.getMessage());
+//            return false;
+//        }
+//        String extension = filename.substring(filename.lastIndexOf('.') + 1);
+//        SceneParser parser = PluginRegistry.parserPlugins.createObject(extension);
+//        if (parser == null) {
+//            UI.printError(Module.API, "Unable to find a suitable parser for: \"%s\"", filename);
+//            return false;
+//        }
+//        try {
+//            return parser.parse(filename, api);
+//        } catch (RuntimeException e) {
+//            e.printStackTrace();
+//            UI.printError(Module.API, "Error occured during translation: %s", e.getMessage());
+//            return false;
+//        } finally {
+//            api.close();
+//        }
+        throw new UnsupportedOperationException("Removed parser support from SunFlow");
     }
 
     /**
@@ -661,26 +657,28 @@ public class SunflowAPI implements SunflowAPIInterface {
      *         otherwise.
      */
     public static SunflowAPI compile(String code) {
-        try {
-            Timer t = new Timer();
-            t.start();
-            SunflowAPI api = (SunflowAPI) ClassBodyEvaluator.createFastClassBodyEvaluator(new Scanner(null, new StringReader(code)), SunflowAPI.class, (ClassLoader) null);
-            t.end();
-            UI.printInfo(Module.API, "Compile time: %s", t.toString());
-            return api;
-        } catch (CompileException e) {
-            UI.printError(Module.API, "%s", e.getMessage());
-            return null;
-        } catch (ParseException e) {
-            UI.printError(Module.API, "%s", e.getMessage());
-            return null;
-        } catch (ScanException e) {
-            UI.printError(Module.API, "%s", e.getMessage());
-            return null;
-        } catch (IOException e) {
-            UI.printError(Module.API, "%s", e.getMessage());
-            return null;
-        }
+// EP : Don't need parser        
+//        try {
+//            Timer t = new Timer();
+//            t.start();
+//            SunflowAPI api = (SunflowAPI) ClassBodyEvaluator.createFastClassBodyEvaluator(new Scanner(null, new StringReader(code)), SunflowAPI.class, (ClassLoader) null);
+//            t.end();
+//            UI.printInfo(Module.API, "Compile time: %s", t.toString());
+//            return api;
+//        } catch (CompileException e) {
+//            UI.printError(Module.API, "%s", e.getMessage());
+//            return null;
+//        } catch (ParseException e) {
+//            UI.printError(Module.API, "%s", e.getMessage());
+//            return null;
+//        } catch (ScanException e) {
+//            UI.printError(Module.API, "%s", e.getMessage());
+//            return null;
+//        } catch (IOException e) {
+//            UI.printError(Module.API, "%s", e.getMessage());
+//            return null;
+//        }
+        throw new UnsupportedOperationException("Removed parser support from SunFlow");
     }
 
     /**
@@ -697,4 +695,12 @@ public class SunflowAPI implements SunflowAPIInterface {
     public void currentFrame(int currentFrame) {
         this.currentFrame = currentFrame;
     }
+
+    // EP : Made texture cache local to a SunFlow API instance
+    private TextureCache textureCache = new TextureCache();
+    
+    public TextureCache getTextureCache() {
+        return this.textureCache;
+    }
+    // EP : End of modification
 }
